@@ -1,4 +1,4 @@
-package ec.edu.ups.icc.fundamentos01.users.exceptions;
+package ec.edu.ups.icc.fundamentos01.core.exceptions;
 
 public class UserNotFoundException extends RuntimeException {
     public UserNotFoundException(int id) {
