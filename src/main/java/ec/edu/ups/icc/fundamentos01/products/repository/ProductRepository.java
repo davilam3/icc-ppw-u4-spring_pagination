@@ -17,7 +17,7 @@ import ec.edu.ups.icc.fundamentos01.products.models.ProductEntity;
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
         // ============== CONSULTAS BÁSICAS (HEREDA AUTOMÁTICAMENTE) ==============
-        // Page<ProductEntity> findAll(Pageable pageable) - Viene de JpaRepository
+        // Page<ProductEntity> findAll(Pageable pageable); //- Viene de JpaRepository
         Slice<ProductEntity> findBy(Pageable pageable);
 
         Optional<ProductEntity> findByName(String name);
@@ -120,4 +120,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
                         @Param("maxPrice") Double maxPrice,
                         @Param("categoryId") Long categoryId,
                         Pageable pageable);
+
+
+        
 }

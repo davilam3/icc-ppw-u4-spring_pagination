@@ -24,14 +24,25 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findAll().stream().map(CategoryMapper::toResponseDto).toList();
     }
 
+    // @Override
+    // public save(CategoryCreateDto createDto) {
+
+    // var categoryEntity = new CategoryEntity();
+    // categoryEntity.setName(createDto.name);
+    // categoryEntity.setDescription(createDto.description);
+    // categoryRepository.save(categoryEntity);
+
+    // }
     @Override
-    public void save(CategoryCreateDto createDto) {
+    public CategoryResponseDto save(CategoryCreateDto createDto) {
 
         var categoryEntity = new CategoryEntity();
         categoryEntity.setName(createDto.name);
         categoryEntity.setDescription(createDto.description);
-        categoryRepository.save(categoryEntity);
 
+        var saved = categoryRepository.save(categoryEntity);
+
+        return CategoryMapper.toResponseDto(saved);
     }
 
 }
