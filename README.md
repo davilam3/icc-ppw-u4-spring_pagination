@@ -63,3 +63,12 @@ Crear un script de carga masiva para poblar la base de datos con datos variados:
 5. Ordenamiento por diferentes campos
 ![slice5price](src/assets/slice5price.jpeg)
 ![slice5name](src/assets/slice5name.jpeg)
+
+
+## **MODULO 11**
+1. login
+![login](src/assets/login.jpeg)
+2. register
+![register](src/assets/register.jpeg)
+3. api/users SIN TOKEN 
+![userno](src/assets/userNoAutorizado.jpeg)
