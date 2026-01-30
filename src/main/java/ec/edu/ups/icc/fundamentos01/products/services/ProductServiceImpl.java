@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import ec.edu.ups.icc.fundamentos01.categories.dtos.CategoryResponseDto;
@@ -25,8 +27,10 @@ import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.products.models.Product;
 import ec.edu.ups.icc.fundamentos01.products.models.ProductEntity;
 import ec.edu.ups.icc.fundamentos01.products.repository.ProductRepository;
+import ec.edu.ups.icc.fundamentos01.security.services.UserDetailsImpl;
 import ec.edu.ups.icc.fundamentos01.users.models.UserEntity;
 import ec.edu.ups.icc.fundamentos01.users.repository.UserRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -119,7 +123,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDto update(Long id, UpdateProductDto dto) {
+    @Transactional
+    public ProductResponseDto update(Long id, UpdateProductDto dto, UserDetailsImpl currentUser) {
 
         // 1. BUSCAR PRODUCTO EXISTENTE
         ProductEntity existing = productRepo.findById(id)
@@ -142,7 +147,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(Long id) {
+    @Transactional
+    public void delete(Long id, UserDetailsImpl currentUser) {
 
         ProductEntity product = productRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Producto no encontrado con ID: " + id));
@@ -197,20 +203,20 @@ public class ProductServiceImpl implements ProductService {
 
     // ============== MÉTODOS HELPER ==============
 
-    private Pageable createPageable(int page, int size, String[] sort) {
-        // Validar parámetros
-        if (page < 0) {
-            throw new BadRequestException("La página debe ser mayor o igual a 0");
-        }
-        if (size < 1 || size > 100) {
-            throw new BadRequestException("El tamaño debe estar entre 1 y 100");
-        }
+    // private Pageable createPageable(int page, int size, String[] sort) {
+    //     // Validar parámetros
+    //     if (page < 0) {
+    //         throw new BadRequestException("La página debe ser mayor o igual a 0");
+    //     }
+    //     if (size < 1 || size > 100) {
+    //         throw new BadRequestException("El tamaño debe estar entre 1 y 100");
+    //     }
 
-        // Crear Sort
-        Sort sortObj = createSort(sort);
+    //     // Crear Sort
+    //     Sort sortObj = createSort(sort);
 
-        return PageRequest.of(page, size, sortObj);
-    }
+    //     return PageRequest.of(page, size, sortObj);
+    // }
 
     private Sort createSort(String[] sort) {
         if (sort == null || sort.length == 0) {
@@ -303,6 +309,67 @@ public class ProductServiceImpl implements ProductService {
                 userId, name, minPrice, maxPrice, categoryId, pageable);
 
         return productPage.map(this::toResponseDto);
+    }
+
+    // ============== MÉTODOS DE VALIDACIÓN Y UTILIDADES ==============
+
+    /**
+     * Valida si el usuario puede modificar/eliminar el producto
+     * 
+     * Lógica:
+     * 1. Si tiene ROLE_ADMIN → Puede modificar cualquier producto
+     * 2. Si tiene ROLE_MODERATOR → Puede modificar cualquier producto
+     * 3. Si es ROLE_USER → Solo puede modificar sus propios productos
+     * 
+     * @param product Producto a validar
+     * @param currentUser Usuario autenticado (del JWT)
+     * @throws AccessDeniedException si no tiene permisos
+     */
+    private void validateOwnership(ProductEntity product, UserDetailsImpl currentUser) {
+        // ADMIN y MODERATOR pueden modificar cualquier producto
+        if (hasAnyRole(currentUser, "ROLE_ADMIN", "ROLE_MODERATOR")) {
+            return;  // ← Pasa la validación automáticamente
+        }
+
+        // USER solo puede modificar sus propios productos
+        if (!product.getOwner().getId().equals(currentUser.getId())) {
+            // ← Lanza excepción que será capturada por GlobalExceptionHandler
+            throw new AccessDeniedException("No puedes modificar productos ajenos");
+        }
+
+        // Si llega aquí, es el dueño → Pasa la validación
+    }
+
+    /**
+     * Verifica si el usuario tiene alguno de los roles especificados
+     * 
+     * @param user Usuario a verificar
+     * @param roles Roles a buscar
+     * @return true si tiene al menos uno de los roles
+     */
+    private boolean hasAnyRole(UserDetailsImpl user, String... roles) {
+        for (String role : roles) {
+            for (GrantedAuthority authority : user.getAuthorities()) {
+                if (authority.getAuthority().equals(role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+ 
+
+    /**
+     * Crea Pageable con ordenamiento dinámico
+     */
+    private Pageable createPageable(int page, int size, String[] sort) {
+        String sortField = sort[0];
+        Sort.Direction sortDirection = sort.length > 1 && sort[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        return PageRequest.of(page, size, Sort.by(sortDirection, sortField));
     }
 
 }
