@@ -153,15 +153,15 @@ public class ProductController {
      * 
      * Nota: Requiere autenticación por .anyRequest().authenticated()
      */
-    @GetMapping("/paginated")
-    public ResponseEntity<Page<ProductResponseDto>> findAllPaginado(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sort", defaultValue = "id") String[] sort) {
+    // @GetMapping("/paginated")
+    // public ResponseEntity<Page<ProductResponseDto>> findAllPaginado(
+    //         @RequestParam(value = "page", defaultValue = "0") int page,
+    //         @RequestParam(value = "size", defaultValue = "10") int size,
+    //         @RequestParam(value = "sort", defaultValue = "id") String[] sort) {
 
-        Page<ProductResponseDto> products = productService.findAllPaginado(page, size, sort);
-        return ResponseEntity.ok(products);
-    }
+    //     Page<ProductResponseDto> products = productService.findAllPaginado(page, size, sort);
+    //     return ResponseEntity.ok(products);
+    // }
 
     /**
      * Listar productos usando Slice para mejor performance
