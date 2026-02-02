@@ -5,8 +5,6 @@ spring:
         url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:devdb}
         username: ${DB_USERNAME:ups}
         password: ${DB_PASSWORD:ups123}
-
-
     jpa:
         hibernate:
             ddl-auto: update
