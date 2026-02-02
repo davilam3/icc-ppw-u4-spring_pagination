@@ -146,20 +146,6 @@ public class ProductController {
         List<ProductResponseDto> products = productService.findByCategoryId(categoryId);
         return ResponseEntity.ok(products);
     }
-
-    // @PutMapping("/{id}")
-    // public ResponseEntity<ProductResponseDto> update(
-    //         @PathVariable("id") Long id,
-    //         @Valid @RequestBody UpdateProductDto dto) {
-    //     ProductResponseDto updated = productService.update(id, dto);
-    //     return ResponseEntity.ok(updated);
-    // }
-
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
-    //     productService.delete(id);
-    //     return ResponseEntity.noContent().build();
-    // }
     /**
      * Actualizar producto (solo dueño, ADMIN o MODERATOR)
      * 
