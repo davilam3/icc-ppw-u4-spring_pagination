@@ -34,3 +34,5 @@ jwt:
     
     # Prefijo del token
     prefix: "Bearer "
+
+    
